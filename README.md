@@ -49,3 +49,4 @@ Unlike ordinary websites that render isolated 3D widgets in a hero box, **Vangua
 - **License:** MIT License (Permits commercial and non-commercial real-time web rendering, modification, and distribution)
 - **Asset Size:** 1.68 MB optimized GLB with separate DRACO web workers for non-blocking main-thread execution
 - **Full Provenance:** See [ASSET_CREDITS.md](./ASSET_CREDITS.md) for complete details
+
