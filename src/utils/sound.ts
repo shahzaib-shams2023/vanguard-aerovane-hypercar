@@ -20,12 +20,59 @@ class HypercarAudio {
     this.isMuted = !this.isMuted;
     if (!this.isMuted) {
       this.playIgnition();
+      this.startEngineDrone();
+    } else {
+      this.stopEngineDrone();
     }
     return !this.isMuted;
   }
 
   public isSoundActive(): boolean {
     return !this.isMuted;
+  }
+
+  // Continuous Dynamic V12 Engine RPM Synthesis
+  private startEngineDrone() {
+    if (!this.ctx || this.engineOsc) return;
+    try {
+      this.engineOsc = this.ctx.createOscillator();
+      this.engineGain = this.ctx.createGain();
+
+      this.engineOsc.type = 'sawtooth';
+      this.engineOsc.frequency.setValueAtTime(55, this.ctx.currentTime);
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(220, this.ctx.currentTime);
+
+      this.engineGain.gain.setValueAtTime(0.015, this.ctx.currentTime);
+
+      this.engineOsc.connect(filter);
+      filter.connect(this.engineGain);
+      this.engineGain.connect(this.ctx.destination);
+
+      this.engineOsc.start();
+    } catch {}
+  }
+
+  private stopEngineDrone() {
+    if (this.engineOsc) {
+      try {
+        this.engineOsc.stop();
+        this.engineOsc.disconnect();
+      } catch {}
+      this.engineOsc = null;
+      this.engineGain = null;
+    }
+  }
+
+  public updateEnginePitch(velocityNormalized: number) {
+    if (this.isMuted || !this.ctx || !this.engineOsc) return;
+    try {
+      // 55 Hz (idle) up to 280 Hz (11,000 RPM scream)
+      const targetFreq = 55 + velocityNormalized * 225;
+      this.engineOsc.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.1);
+    } catch {}
   }
 
   // V12 Engine Starter & Low-Frequency Throttle Rumble

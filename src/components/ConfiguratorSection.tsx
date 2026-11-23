@@ -25,22 +25,29 @@ export const ConfiguratorSection: React.FC<ConfiguratorSectionProps> = ({
   return (
     <section
       id="configurator-section"
-      className="relative min-h-screen w-full flex flex-col justify-between py-32 px-4 sm:px-8 lg:px-12 select-none"
+      className="relative min-h-screen w-full flex flex-col justify-between pt-28 pb-20 px-4 sm:px-8 lg:px-12 select-none overflow-hidden"
     >
+      {/* Background Subtle Watermark */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
+        <span className="font-display text-[20vw] font-bold text-white tracking-widest whitespace-nowrap">
+          ATELIER
+        </span>
+      </div>
+
       {/* Top Section Header */}
-      <div className="max-w-[1440px] mx-auto w-full text-center space-y-4">
-        <div className="inline-flex items-center space-x-2 text-[10px] font-mono tracking-telemetry text-vanguard-red uppercase bg-vanguard-panel/70 border border-vanguard-border px-3.5 py-1.5 rounded">
+      <div className="max-w-[1440px] mx-auto w-full text-center space-y-3 z-10">
+        <div className="inline-flex items-center space-x-2 text-[10px] font-mono tracking-telemetry text-vanguard-red uppercase bg-vanguard-panel/80 border border-vanguard-border px-4 py-1.5 rounded-full backdrop-blur">
           <Palette className="w-3.5 h-3.5" />
-          <span>VANGUARD ATELIER // BESPOKE CHASSIS SPECIFICATION</span>
+          <span>CHAPTER 06 // VANGUARD ATELIER & BESPOKE SPECIFICATION</span>
         </div>
-        <h2 className="font-display text-4xl sm:text-6xl font-bold text-white uppercase leading-[0.95]">
+        <h2 className="font-display text-4xl sm:text-6xl font-bold text-white uppercase leading-[0.92]">
           Architect Your <br />
           <span className="text-vanguard-red">Velocity</span>
         </h2>
       </div>
 
       {/* Middle Space for 3D Car Model */}
-      <div className="h-64 sm:h-80" />
+      <div className="h-72 sm:h-96" />
 
       {/* Bottom Interactive Atelier Control Panel */}
       <div className="max-w-4xl mx-auto w-full carbon-panel p-6 sm:p-10 rounded-3xl border border-vanguard-border shadow-carbon-panel space-y-8 z-10">

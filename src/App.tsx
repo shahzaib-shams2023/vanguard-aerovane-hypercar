@@ -2,13 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Lenis from 'lenis';
 import { CustomCursor } from './components/CustomCursor';
 import { Navbar } from './components/Navbar';
+import { CinematicHud } from './components/CinematicHud';
 import { PersistentCarCanvas, PAINT_OPTIONS, CarPaintOption } from './components/PersistentCarCanvas';
-import { HeroSection } from './components/HeroSection';
-import { DesignSection } from './components/DesignSection';
-import { PerformanceSection } from './components/PerformanceSection';
-import { EngineeringSection } from './components/EngineeringSection';
-import { CockpitSection } from './components/CockpitSection';
-import { ConfiguratorSection } from './components/ConfiguratorSection';
+import { CinematicFilmStage } from './components/CinematicFilmStage';
 import { Footer } from './components/Footer';
 import { ReserveDrawer } from './components/ReserveDrawer';
 
@@ -53,9 +49,9 @@ export function App() {
     };
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const scrollToProgress = (p: number) => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: maxScroll * p, behavior: 'smooth' });
   };
 
   return (
@@ -63,49 +59,38 @@ export function App() {
       {/* Precision Trailing HUD Cursor */}
       <CustomCursor />
 
+      {/* Persistent Cinematic Director Viewport & Timecode HUD */}
+      <CinematicHud scrollProgress={scrollProgress} />
+
       {/* Central Persistent 3D Sports Car Canvas */}
       <PersistentCarCanvas
         scrollProgress={scrollProgress}
         activePaint={activePaint}
+        aeroMode={aeroMode}
       />
 
       {/* Telemetry Navigation Header */}
       <Navbar
         scrollProgress={scrollProgress}
         onOpenReserve={() => setIsReserveOpen(true)}
+        onNavigateTo={scrollToProgress}
       />
 
-      {/* DOM Narrative Content (Layered over the 3D Sports Car Canvas) */}
-      <main id="main-content" className="relative z-10">
-        {/* Section 01: Hero Zenith Stance */}
-        <HeroSection
-          onExplore={() => scrollToSection('design-section')}
-          onOpenReserve={() => setIsReserveOpen(true)}
-        />
+      {/* Synchronized Cinematic Film Stage (Chapters 01 to 06) */}
+      <CinematicFilmStage
+        scrollProgress={scrollProgress}
+        activePaint={activePaint}
+        onSelectPaint={setActivePaint}
+        aeroMode={aeroMode}
+        onToggleAeroMode={setAeroMode}
+        caliperColor={caliperColor}
+        onSelectCaliper={setCaliperColor}
+        onOpenReserve={() => setIsReserveOpen(true)}
+        onNavigateTo={scrollToProgress}
+      />
 
-        {/* Section 02: Computational Fluid Dynamics (Design) */}
-        <DesignSection />
-
-        {/* Section 03: Hybrid Powertrain & Velocity (Performance) */}
-        <PerformanceSection />
-
-        {/* Section 04: Monocoque Chassis Architecture (Engineering) */}
-        <EngineeringSection />
-
-        {/* Section 05: Driver Enclosure & Ergonomics (Cockpit) */}
-        <CockpitSection />
-
-        {/* Section 06: Runway Finale & Atelier Configurator */}
-        <ConfiguratorSection
-          activePaint={activePaint}
-          onSelectPaint={setActivePaint}
-          aeroMode={aeroMode}
-          onToggleAeroMode={setAeroMode}
-          caliperColor={caliperColor}
-          onSelectCaliper={setCaliperColor}
-          onOpenReserve={() => setIsReserveOpen(true)}
-        />
-      </main>
+      {/* Extended scroll track providing Lenis smooth inertia across all 6 cinematic acts */}
+      <div className="h-[650vh] pointer-events-none" />
 
       {/* Track Telemetry Colophon */}
       <Footer />

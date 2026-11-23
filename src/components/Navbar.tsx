@@ -5,9 +5,10 @@ import { hypercarAudio } from '../utils/sound';
 interface NavbarProps {
   scrollProgress: number;
   onOpenReserve: () => void;
+  onNavigateTo?: (progress: number) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ scrollProgress, onOpenReserve }) => {
+export const Navbar: React.FC<NavbarProps> = ({ scrollProgress, onOpenReserve, onNavigateTo }) => {
   const [audioActive, setAudioActive] = useState<boolean>(false);
   const [speedKmh, setSpeedKmh] = useState<number>(0);
 
@@ -22,10 +23,14 @@ export const Navbar: React.FC<NavbarProps> = ({ scrollProgress, onOpenReserve })
     setAudioActive(active);
   };
 
-  const scrollTo = (id: string) => {
+  const handleNav = (targetP: number, fallbackId: string) => {
     hypercarAudio.playClick();
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigateTo) {
+      onNavigateTo(targetP);
+    } else {
+      const el = document.getElementById(fallbackId);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -70,41 +75,48 @@ export const Navbar: React.FC<NavbarProps> = ({ scrollProgress, onOpenReserve })
         </div>
 
         {/* Section Navigation */}
-        <nav className="hidden lg:flex items-center space-x-8 font-mono text-[10px] tracking-telemetry uppercase text-vanguard-muted">
+        <nav className="hidden lg:flex items-center space-x-6 font-mono text-[10px] tracking-telemetry uppercase text-vanguard-muted">
           <button
-            onClick={() => scrollTo('design-section')}
-            data-cursor="INSPECT"
+            onClick={() => handleNav(0.0, 'hero-section')}
+            data-cursor="ZENITH"
             className="hover:text-vanguard-red transition-colors"
           >
-            [01 // AERO]
+            [01 // ZENITH]
           </button>
           <button
-            onClick={() => scrollTo('performance-section')}
-            data-cursor="VELOCITY"
+            onClick={() => handleNav(0.24, 'design-section')}
+            data-cursor="AERO"
             className="hover:text-vanguard-red transition-colors"
           >
-            [02 // POWERTRAIN]
+            [02 // CFD AERO]
           </button>
           <button
-            onClick={() => scrollTo('engineering-section')}
-            data-cursor="CHASSIS"
+            onClick={() => handleNav(0.46, 'performance-section')}
+            data-cursor="V-MAX"
             className="hover:text-vanguard-red transition-colors"
           >
-            [03 // CHASSIS]
+            [03 // V-MAX]
           </button>
           <button
-            onClick={() => scrollTo('cockpit-section')}
+            onClick={() => handleNav(0.66, 'engineering-section')}
+            data-cursor="CAD"
+            className="hover:text-vanguard-red transition-colors"
+          >
+            [04 // CAD X-RAY]
+          </button>
+          <button
+            onClick={() => handleNav(0.82, 'cockpit-section')}
             data-cursor="COCKPIT"
             className="hover:text-vanguard-red transition-colors"
           >
-            [04 // CABIN]
+            [05 // COCKPIT]
           </button>
           <button
-            onClick={() => scrollTo('configurator-section')}
-            data-cursor="BUILD"
+            onClick={() => handleNav(0.96, 'configurator-section')}
+            data-cursor="ATELIER"
             className="hover:text-vanguard-red transition-colors"
           >
-            [05 // ATELIER]
+            [06 // ATELIER]
           </button>
         </nav>
 
