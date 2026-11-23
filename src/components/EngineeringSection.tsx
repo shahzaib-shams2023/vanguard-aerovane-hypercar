@@ -7,7 +7,7 @@ export const EngineeringSection: React.FC = () => {
       id="engineering-section"
       className="relative min-h-screen w-full flex items-center py-32 px-4 sm:px-8 lg:px-12 pointer-events-none select-none"
     >
-      <div className="max-w-[1720px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left Column: Monocoque Blueprint Telemetry */}
         <div className="lg:col-span-5 carbon-panel p-8 sm:p-12 rounded-2xl border border-vanguard-border space-y-8 pointer-events-auto shadow-carbon-panel">
           <div className="space-y-3">

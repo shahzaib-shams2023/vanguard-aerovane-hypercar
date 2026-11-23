@@ -11,36 +11,36 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onOpenReser
   return (
     <section
       id="hero-section"
-      className="relative min-h-screen w-full flex flex-col justify-between pt-28 pb-12 px-4 sm:px-8 lg:px-12 pointer-events-none select-none"
+      className="relative min-h-screen w-full flex flex-col justify-between pt-24 pb-10 px-6 sm:px-10 lg:px-12 pointer-events-none select-none"
     >
       {/* Top Header / Eyebrow */}
-      <div className="max-w-[1720px] mx-auto w-full pt-6">
-        <div className="inline-flex items-center space-x-3 text-[10px] font-mono tracking-telemetry text-vanguard-red uppercase bg-vanguard-panel/70 border border-vanguard-border px-3.5 py-1.5 rounded pointer-events-auto">
+      <div className="max-w-[1440px] mx-auto w-full pt-4">
+        <div className="inline-flex items-center space-x-3 text-[10px] font-mono tracking-telemetry text-vanguard-red uppercase bg-vanguard-panel/80 border border-vanguard-border px-3.5 py-1.5 rounded pointer-events-auto shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-vanguard-red animate-pulse" />
-          <span>FIA HOMOLOGATED TRACK WEAPON // LIMITED PRODUCTION OF 35 CHASSIS</span>
+          <span>FIA HOMOLOGATED TRACK WEAPON // 35 CHASSIS ALLOCATION</span>
         </div>
       </div>
 
       {/* Center Monumental Automotive Typography */}
-      <div className="max-w-[1720px] mx-auto w-full my-auto py-8">
-        <div className="max-w-3xl space-y-4">
-          <h1 className="font-display text-5xl sm:text-7xl lg:text-9xl font-bold tracking-tighter text-white uppercase leading-[0.88]">
+      <div className="max-w-[1440px] mx-auto w-full my-auto py-6">
+        <div className="max-w-xl space-y-4">
+          <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight text-white uppercase leading-[0.92]">
             AEROVANE <br />
-            <span className="text-vanguard-red tracking-tight">V12</span>
+            <span className="text-vanguard-red">V12</span>
           </h1>
 
-          <p className="font-sans text-sm sm:text-base text-vanguard-muted font-light max-w-xl leading-relaxed pt-2">
-            The ultimate convergence of computational fluid dynamics, an 11,000 RPM naturally aspirated V12, and quad-inverter torque-vectoring electric propulsion. Designed to distort time and tarmac.
+          <p className="font-sans text-xs sm:text-sm text-vanguard-muted font-light max-w-lg leading-relaxed pt-1">
+            A 1,420 BHP hybrid track weapon. Naturally aspirated 6.5L V12 paired with tri-axial axial-flux electric motors. Active ground-effect aerodynamics generating 980 kg of downforce.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-4 pointer-events-auto">
+          <div className="flex flex-wrap items-center gap-4 pt-3 pointer-events-auto">
             <button
               onClick={() => {
                 hypercarAudio.playAeroSurge();
                 onExplore();
               }}
               data-cursor="ACCELERATE"
-              className="px-8 py-3.5 rounded bg-vanguard-red hover:bg-vanguard-redGlow text-white font-mono text-xs tracking-telemetry uppercase transition-all shadow-glow-red flex items-center space-x-2"
+              className="px-7 py-3 rounded bg-vanguard-red hover:bg-vanguard-redGlow text-white font-mono text-xs tracking-telemetry uppercase transition-all shadow-glow-red flex items-center space-x-2 hover:-translate-y-0.5 active:translate-y-0"
             >
               <span>ENGAGE AERODYNAMICS</span>
               <ArrowDown className="w-4 h-4" />
@@ -52,7 +52,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onOpenReser
                 onOpenReserve();
               }}
               data-cursor="SPECIFY"
-              className="px-7 py-3.5 rounded carbon-panel hover:bg-vanguard-panel border border-vanguard-border text-vanguard-silver font-mono text-xs tracking-telemetry uppercase transition-all hover:border-vanguard-red"
+              className="px-6 py-3 rounded carbon-panel hover:bg-vanguard-panel border border-vanguard-border text-vanguard-silver font-mono text-xs tracking-telemetry uppercase transition-all hover:border-vanguard-red hover:-translate-y-0.5 active:translate-y-0"
             >
               RESERVE CHASSIS
             </button>
@@ -61,7 +61,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExplore, onOpenReser
       </div>
 
       {/* Bottom Telemetry Strip */}
-      <div className="max-w-[1720px] mx-auto w-full border-t border-vanguard-border/70 pt-6">
+      <div className="max-w-[1440px] mx-auto w-full border-t border-vanguard-border/70 pt-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 font-mono">
           <div className="space-y-1">
             <span className="text-[9px] tracking-telemetry text-vanguard-muted uppercase block">

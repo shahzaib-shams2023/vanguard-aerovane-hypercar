@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({ scrollProgress, onOpenReserve })
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 carbon-panel border-b border-vanguard-border/80 transition-all duration-300">
-      <div className="max-w-[1720px] mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-12 py-3.5 flex items-center justify-between">
         {/* Brand & Badge */}
         <div className="flex items-center space-x-6">
           <a

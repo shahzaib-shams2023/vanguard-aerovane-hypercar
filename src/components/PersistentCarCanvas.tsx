@@ -13,11 +13,11 @@ export interface CarPaintOption {
 }
 
 export const PAINT_OPTIONS: CarPaintOption[] = [
-  { id: 'rosso-corsa', name: 'Rosso Corsa Crimson', color: '#D40000', hex: 0xd40000, roughness: 0.15, metalness: 0.85 },
-  { id: 'nero-daytona', name: 'Nero Daytona Carbon', color: '#111215', hex: 0x111215, roughness: 0.12, metalness: 0.9 },
-  { id: 'grigio-titanio', name: 'Grigio Titanio Silver', color: '#8E94A0', hex: 0x8e94a0, roughness: 0.18, metalness: 0.92 },
-  { id: 'giallo-modena', name: 'Giallo Modena Yellow', color: '#FFB800', hex: 0xffb800, roughness: 0.2, metalness: 0.8 },
-  { id: 'monaco-azzurro', name: 'Monaco Azzurro Cerulean', color: '#0055A5', hex: 0x0055a5, roughness: 0.16, metalness: 0.88 },
+  { id: 'rosso-corsa', name: 'Rosso Corsa Crimson', color: '#D40000', hex: 0xd40000, roughness: 0.12, metalness: 0.88 },
+  { id: 'nero-daytona', name: 'Nero Daytona Carbon', color: '#111215', hex: 0x111215, roughness: 0.1, metalness: 0.92 },
+  { id: 'grigio-titanio', name: 'Grigio Titanio Silver', color: '#8E94A0', hex: 0x8e94a0, roughness: 0.16, metalness: 0.94 },
+  { id: 'giallo-modena', name: 'Giallo Modena Yellow', color: '#FFB800', hex: 0xffb800, roughness: 0.18, metalness: 0.82 },
+  { id: 'monaco-azzurro', name: 'Monaco Azzurro Cerulean', color: '#0055A5', hex: 0x0055a5, roughness: 0.14, metalness: 0.9 },
 ];
 
 interface PersistentCarCanvasProps {
@@ -46,15 +46,15 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
 
     // 1. SCENE SETUP
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x08090b, 0.055);
+    scene.fog = new THREE.FogExp2(0x07080a, 0.05);
 
     const camera = new THREE.PerspectiveCamera(
-      36,
+      35,
       container.clientWidth / container.clientHeight,
       0.1,
       100
     );
-    camera.position.set(3.2, 1.3, 4.6);
+    camera.position.set(3.4, 1.2, 4.4);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -66,66 +66,86 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
 
     // 2. STUDIO ENVIRONMENT & LIGHTING
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    // Key overhead warm softbox light
-    const keyLight = new THREE.DirectionalLight(0xfff5ea, 2.8);
-    keyLight.position.set(5, 7, 4);
+    // Overhead key softbox light
+    const keyLight = new THREE.DirectionalLight(0xfff8ee, 3.2);
+    keyLight.position.set(6, 8, 5);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
     keyLight.shadow.mapSize.height = 2048;
     keyLight.shadow.camera.near = 1;
-    keyLight.shadow.camera.far = 20;
-    keyLight.shadow.camera.left = -5;
-    keyLight.shadow.camera.right = 5;
-    keyLight.shadow.camera.top = 5;
-    keyLight.shadow.camera.bottom = -5;
-    keyLight.shadow.bias = -0.0004;
+    keyLight.shadow.camera.far = 25;
+    keyLight.shadow.camera.left = -6;
+    keyLight.shadow.camera.right = 6;
+    keyLight.shadow.camera.top = 6;
+    keyLight.shadow.camera.bottom = -6;
+    keyLight.shadow.bias = -0.0003;
     scene.add(keyLight);
 
-    // Rim back light (sculpts roofline)
-    const rimLight = new THREE.DirectionalLight(0x70aaff, 1.6);
+    // Cool rim light (outlines the aerodynamic waistline)
+    const rimLight = new THREE.DirectionalLight(0x75b0ff, 1.8);
     rimLight.position.set(-6, 3, -5);
     scene.add(rimLight);
 
-    // Underbody track diffuser glow (Rosso Corsa red)
-    const underGlow = new THREE.PointLight(0xe61a24, 2.2, 7);
-    underGlow.position.set(0, -0.2, 0);
+    // Fill light (ensures wheel arches & underbody are beautifully lit)
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    fillLight.position.set(0, 2, 6);
+    scene.add(fillLight);
+
+    // Rosso Corsa diffuser ground effect glow
+    const underGlow = new THREE.PointLight(0xe61a24, 2.5, 8);
+    underGlow.position.set(0, -0.4, 0);
     scene.add(underGlow);
 
     // 3. STUDIO FLOOR & TELEMETRY RINGS
     const floorGroup = new THREE.Group();
     scene.add(floorGroup);
 
-    const floorGeo = new THREE.PlaneGeometry(36, 36);
+    const groundLevel = -0.55;
+
+    const floorGeo = new THREE.PlaneGeometry(48, 48);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x0a0c10,
-      roughness: 0.65,
-      metalness: 0.35,
+      color: 0x07080a,
+      roughness: 0.72,
+      metalness: 0.28,
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.4;
+    floor.position.y = groundLevel;
     floor.receiveShadow = true;
     floorGroup.add(floor);
 
-    // Precision Ring Dial on floor
-    const ringGeo = new THREE.RingGeometry(3.1, 3.14, 64);
+    // Telemetry track ring on floor
+    const ringGeo = new THREE.RingGeometry(3.2, 3.24, 64);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x232733,
+      color: 0x1f232d,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.7,
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = -Math.PI / 2;
-    ring.position.y = -0.395;
+    ring.position.y = groundLevel + 0.002;
     floorGroup.add(ring);
+
+    // Inner dashed orbit ring
+    const innerRingGeo = new THREE.RingGeometry(2.1, 2.12, 64);
+    const innerRingMat = new THREE.MeshBasicMaterial({
+      color: 0x242833,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.5,
+    });
+    const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+    innerRing.rotation.x = -Math.PI / 2;
+    innerRing.position.y = groundLevel + 0.003;
+    floorGroup.add(innerRing);
 
     // 4. KINETIC SPEEDLINES (Active during Performance section)
     const speedlineCount = 120;
@@ -134,10 +154,10 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
     const speedlineSpeeds: number[] = [];
 
     for (let i = 0; i < speedlineCount; i++) {
-      speedlinePositions[i * 3] = (Math.random() - 0.5) * 12;
-      speedlinePositions[i * 3 + 1] = Math.random() * 2.5 - 0.3;
-      speedlinePositions[i * 3 + 2] = (Math.random() - 0.5) * 14;
-      speedlineSpeeds.push(Math.random() * 0.15 + 0.08);
+      speedlinePositions[i * 3] = (Math.random() - 0.5) * 14;
+      speedlinePositions[i * 3 + 1] = Math.random() * 2.5 - 0.4;
+      speedlinePositions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+      speedlineSpeeds.push(Math.random() * 0.16 + 0.09);
     }
     speedlineGeo.setAttribute('position', new THREE.BufferAttribute(speedlinePositions, 3));
 
@@ -159,37 +179,49 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
     const bodyMaterial = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(activePaintRef.current.hex),
       metalness: 0.88,
-      roughness: 0.15,
+      roughness: 0.12,
       clearcoat: 1.0,
       clearcoatRoughness: 0.04,
-      reflectivity: 0.95,
+      reflectivity: 0.96,
     });
 
     const glassMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x111620,
       metalness: 0.1,
-      roughness: 0.05,
-      transmission: 0.9,
+      roughness: 0.04,
+      transmission: 0.92,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.32,
     });
 
-    const carbonMaterial = new THREE.MeshStandardMaterial({
-      color: 0x14161a,
-      metalness: 0.8,
-      roughness: 0.45,
-    });
-
-    const wheelMaterial = new THREE.MeshStandardMaterial({
-      color: 0x8a92a0,
+    const alloyRimMaterial = new THREE.MeshStandardMaterial({
+      color: 0xdde3ea,
       metalness: 0.95,
-      roughness: 0.22,
+      roughness: 0.15,
     });
 
-    const tireMaterial = new THREE.MeshStandardMaterial({
-      color: 0x151618,
-      metalness: 0.05,
+    const brakeCaliperMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffcc00,
+      metalness: 0.35,
+      roughness: 0.25,
+    });
+
+    const brakeDiscMaterial = new THREE.MeshStandardMaterial({
+      color: 0x363940,
+      metalness: 0.85,
+      roughness: 0.35,
+    });
+
+    const tireRubberMaterial = new THREE.MeshStandardMaterial({
+      color: 0x18191c,
+      metalness: 0.04,
       roughness: 0.88,
+    });
+
+    const carbonFiberMaterial = new THREE.MeshStandardMaterial({
+      color: 0x14161a,
+      metalness: 0.75,
+      roughness: 0.45,
     });
 
     const bodyMeshes: THREE.Mesh[] = [];
@@ -215,34 +247,66 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
             const origMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
             const matName = (origMat?.name || '').toLowerCase();
 
-            // Target the main body paint specifically for custom automotive lacquer clearcoat
+            // 1. Car Body Lacquer Paint
             if (
               matName.includes('body_color') ||
-              matName.includes('yellow') ||
               matName.includes('dodger') ||
               meshName.includes('body')
             ) {
               mesh.material = bodyMaterial;
               bodyMeshes.push(mesh);
-            } else if (matName.includes('glass')) {
-              // Ensure glass has refined transparency
+            }
+            // 2. Glass and windscreen
+            else if (matName.includes('glass')) {
               mesh.material = glassMaterial;
-            } else if (matName.includes('metal_chrome')) {
-              // Ensure chrome accents shine
-              (origMat as THREE.MeshStandardMaterial).metalness = 0.95;
-              (origMat as THREE.MeshStandardMaterial).roughness = 0.1;
-            } else if (matName.includes('tires')) {
-              // Proper tire rubber
-              (origMat as THREE.MeshStandardMaterial).roughness = 0.85;
+            }
+            // 3. Forged Alloy Rims
+            else if (
+              meshName.includes('rim') ||
+              meshName === 'wheel' ||
+              matName.includes('metal_chrome') ||
+              (matName.includes('metal_gray') && (meshName.includes('rim') || meshName.includes('wheel')))
+            ) {
+              mesh.material = alloyRimMaterial;
+            }
+            // 4. Brake Discs
+            else if (meshName.includes('brake')) {
+              mesh.material = brakeDiscMaterial;
+            }
+            // 5. Brake Calipers & Wheel Badges
+            else if (
+              meshName.includes('centre') ||
+              matName.includes('ferrari_yellow') ||
+              meshName.includes('caliper')
+            ) {
+              mesh.material = brakeCaliperMaterial;
+            }
+            // 6. Pirelli Compound Tires
+            else if (meshName.includes('tire') || matName.includes('tires')) {
+              mesh.material = tireRubberMaterial;
+            }
+            // 7. Carbon Fiber Aerodynamic Elements
+            else if (
+              matName.includes('carbon') ||
+              meshName.includes('carbon') ||
+              meshName.includes('diffuser') ||
+              meshName.includes('splitter')
+            ) {
+              mesh.material = carbonFiberMaterial;
             }
           }
         });
 
-        // Center and normalize scale
+        // ACCURATELY GROUND THE CAR:
+        // Calculate the bounding box of the entire vehicle
         const box = new THREE.Box3().setFromObject(car);
         const center = box.getCenter(new THREE.Vector3());
-        car.position.sub(center);
-        car.position.y += 0.04;
+
+        // Center X and Z so rotation occurs around vehicle center
+        car.position.x = -center.x;
+        car.position.z = -center.z;
+        // Position car vertically so the absolute bottom of the tires (box.min.y) sits on y = 0
+        car.position.y = -box.min.y;
 
         carRoot.add(car);
         setIsLoaded(true);
@@ -259,61 +323,61 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
     );
 
     // 6. SCROLL CHOREOGRAPHY & KEYFRAME INTERPOLATION
-    // Target vectors for smooth lerping
     const targetCarPos = new THREE.Vector3();
     const targetCarRot = new THREE.Euler();
     const targetCamPos = new THREE.Vector3();
     const targetCamTarget = new THREE.Vector3();
 
-    const currentCamTarget = new THREE.Vector3(0, 0.1, 0);
+    const currentCamTarget = new THREE.Vector3(0.3, 0.2, 0);
 
     const calculateKeyframe = (p: number) => {
-      // p is between 0.0 (top) and 1.0 (bottom)
+      // p: 0.0 (hero top) to 1.0 (configurator bottom)
+      // Car ground elevation is locked to groundLevel = -0.55 so tires touch the floor with 0 clipping
       if (p <= 0.16) {
-        // Section 1: Hero Front 3/4 Stance
+        // Section 1: Hero Front 3/4 Dynamic Stance
         const t = p / 0.16;
-        targetCarPos.set(0.8, -0.38, 0.2);
-        targetCarRot.set(0, 2.25 + t * 0.15, 0);
-        targetCamPos.set(3.4, 1.25, 4.2);
-        targetCamTarget.set(0.4, 0.15, 0);
+        targetCarPos.set(0.75, groundLevel, 0.1);
+        targetCarRot.set(0, 2.3 + t * 0.15, 0);
+        targetCamPos.set(3.4, 1.15, 4.2);
+        targetCamTarget.set(0.35, 0.18, 0);
         speedlineMat.opacity = 0;
       } else if (p <= 0.36) {
         // Section 2: Aerodynamics & Front Flanks
         const t = (p - 0.16) / 0.2;
         targetCarPos.set(
-          THREE.MathUtils.lerp(0.8, -1.1, t),
-          -0.38,
-          THREE.MathUtils.lerp(0.2, 0.6, t)
+          THREE.MathUtils.lerp(0.75, -1.0, t),
+          groundLevel,
+          THREE.MathUtils.lerp(0.1, 0.5, t)
         );
-        targetCarRot.set(0, THREE.MathUtils.lerp(2.4, 3.6, t), 0);
+        targetCarRot.set(0, THREE.MathUtils.lerp(2.45, 3.65, t), 0);
         targetCamPos.set(
-          THREE.MathUtils.lerp(3.4, 2.4, t),
-          THREE.MathUtils.lerp(1.25, 0.95, t),
-          THREE.MathUtils.lerp(4.2, 3.0, t)
+          THREE.MathUtils.lerp(3.4, 2.5, t),
+          THREE.MathUtils.lerp(1.15, 0.9, t),
+          THREE.MathUtils.lerp(4.2, 3.2, t)
         );
         targetCamTarget.set(
-          THREE.MathUtils.lerp(0.4, -0.6, t),
-          0.25,
+          THREE.MathUtils.lerp(0.35, -0.6, t),
+          0.22,
           THREE.MathUtils.lerp(0, 0.2, t)
         );
         speedlineMat.opacity = t * 0.25;
       } else if (p <= 0.56) {
-        // Section 3: Powertrain & Velocity (Rear haunches & diffuser)
+        // Section 3: Powertrain & Velocity (Rear haunches & active diffuser)
         const t = (p - 0.36) / 0.2;
         targetCarPos.set(
-          THREE.MathUtils.lerp(-1.1, 1.3, t),
-          -0.38,
-          THREE.MathUtils.lerp(0.6, -0.4, t)
+          THREE.MathUtils.lerp(-1.0, 1.25, t),
+          groundLevel,
+          THREE.MathUtils.lerp(0.5, -0.3, t)
         );
-        targetCarRot.set(0, THREE.MathUtils.lerp(3.6, 5.8, t), 0);
+        targetCarRot.set(0, THREE.MathUtils.lerp(3.65, 5.85, t), 0);
         targetCamPos.set(
-          THREE.MathUtils.lerp(2.4, -2.4, t),
-          THREE.MathUtils.lerp(0.95, 0.75, t),
-          THREE.MathUtils.lerp(3.0, -2.6, t)
+          THREE.MathUtils.lerp(2.5, -2.5, t),
+          THREE.MathUtils.lerp(0.9, 0.72, t),
+          THREE.MathUtils.lerp(3.2, -2.7, t)
         );
         targetCamTarget.set(
-          THREE.MathUtils.lerp(-0.6, 0.6, t),
-          0.32,
+          THREE.MathUtils.lerp(-0.6, 0.65, t),
+          0.28,
           THREE.MathUtils.lerp(0.2, 0, t)
         );
         speedlineMat.opacity = 0.85;
@@ -321,33 +385,33 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
         // Section 4: Engineering & Monocoque (High-angle CAD blueprint)
         const t = (p - 0.56) / 0.18;
         targetCarPos.set(
-          THREE.MathUtils.lerp(1.3, 0, t),
-          -0.35,
-          THREE.MathUtils.lerp(-0.4, 0, t)
+          THREE.MathUtils.lerp(1.25, 0, t),
+          groundLevel + 0.05,
+          THREE.MathUtils.lerp(-0.3, 0, t)
         );
         targetCarRot.set(
-          THREE.MathUtils.lerp(0, 0.22, t),
-          THREE.MathUtils.lerp(5.8, 7.2, t),
+          THREE.MathUtils.lerp(0, 0.18, t),
+          THREE.MathUtils.lerp(5.85, 7.3, t),
           0
         );
         targetCamPos.set(
-          THREE.MathUtils.lerp(-2.4, 0.1, t),
-          THREE.MathUtils.lerp(0.75, 3.8, t),
-          THREE.MathUtils.lerp(-2.6, 3.2, t)
+          THREE.MathUtils.lerp(-2.5, 0.1, t),
+          THREE.MathUtils.lerp(0.72, 3.8, t),
+          THREE.MathUtils.lerp(-2.7, 3.2, t)
         );
-        targetCamTarget.set(0, 0, 0);
+        targetCamTarget.set(0, 0.05, 0);
         speedlineMat.opacity = (1 - t) * 0.85;
       } else if (p <= 0.88) {
-        // Section 5: Cockpit & Ergonomics (Camera dive towards driver cabin)
+        // Section 5: Cockpit & Ergonomics (Driver cabin dive)
         const t = (p - 0.74) / 0.14;
         targetCarPos.set(
           THREE.MathUtils.lerp(0, 0.2, t),
-          THREE.MathUtils.lerp(-0.35, -0.55, t),
-          THREE.MathUtils.lerp(0, 0.3, t)
+          groundLevel,
+          THREE.MathUtils.lerp(0, 0.25, t)
         );
         targetCarRot.set(
-          THREE.MathUtils.lerp(0.22, 0, t),
-          THREE.MathUtils.lerp(7.2, 8.6, t),
+          THREE.MathUtils.lerp(0.18, 0, t),
+          THREE.MathUtils.lerp(7.3, 8.7, t),
           0
         );
         targetCamPos.set(
@@ -355,23 +419,23 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
           THREE.MathUtils.lerp(3.8, 0.95, t),
           THREE.MathUtils.lerp(3.2, 1.35, t)
         );
-        targetCamTarget.set(0.05, 0.65, 0.1);
+        targetCamTarget.set(0.08, 0.65, 0.1);
         speedlineMat.opacity = 0;
       } else {
         // Section 6: Runway Finale & Atelier Configurator
         const t = Math.min(1, (p - 0.88) / 0.12);
         targetCarPos.set(
           THREE.MathUtils.lerp(0.2, 0, t),
-          THREE.MathUtils.lerp(-0.55, -0.38, t),
-          THREE.MathUtils.lerp(0.3, 0, t)
+          groundLevel,
+          THREE.MathUtils.lerp(0.25, 0, t)
         );
-        targetCarRot.set(0, THREE.MathUtils.lerp(8.6, 8.4, t), 0);
+        targetCarRot.set(0, THREE.MathUtils.lerp(8.7, 8.5, t), 0);
         targetCamPos.set(
-          THREE.MathUtils.lerp(0.55, 3.4, t),
+          THREE.MathUtils.lerp(0.55, 3.5, t),
           THREE.MathUtils.lerp(0.95, 1.25, t),
-          THREE.MathUtils.lerp(1.35, 4.0, t)
+          THREE.MathUtils.lerp(1.35, 4.2, t)
         );
-        targetCamTarget.set(0, 0.15, 0);
+        targetCamTarget.set(0, 0.18, 0);
         speedlineMat.opacity = 0;
       }
     };
@@ -385,7 +449,6 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
 
-      // Compute targets based on current scroll
       calculateKeyframe(scrollRef.current);
 
       // Smooth camera interpolation
@@ -399,7 +462,7 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
       carRoot.rotation.y = THREE.MathUtils.lerp(carRoot.rotation.y, targetCarRot.y, 0.08);
       carRoot.rotation.z = THREE.MathUtils.lerp(carRoot.rotation.z, targetCarRot.z, 0.08);
 
-      // Dynamic paint material color update
+      // Dynamic paint material update
       const activeHex = activePaintRef.current.hex;
       if (bodyMaterial.color.getHex() !== activeHex) {
         bodyMaterial.color.setHex(activeHex);
@@ -410,16 +473,17 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
       if (speedlineMat.opacity > 0.01) {
         const posArr = speedlineGeo.attributes.position.array as Float32Array;
         for (let i = 0; i < speedlineCount; i++) {
-          posArr[i * 3 + 2] += speedlineSpeeds[i] * 1.8;
-          if (posArr[i * 3 + 2] > 7) {
-            posArr[i * 3 + 2] = -7;
+          posArr[i * 3 + 2] += speedlineSpeeds[i] * 2.0;
+          if (posArr[i * 3 + 2] > 8) {
+            posArr[i * 3 + 2] = -8;
           }
         }
         speedlineGeo.attributes.position.needsUpdate = true;
       }
 
-      // Floor ring slow rotation
-      ring.rotation.z = time * 0.04;
+      // Floor ring slow telemetry spin
+      ring.rotation.z = time * 0.03;
+      innerRing.rotation.z = -time * 0.02;
 
       renderer.render(scene, camera);
     };
@@ -462,7 +526,7 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
               <span className="w-2 h-2 rounded-full bg-vanguard-red animate-ping" />
               <span>INITIALIZING V12 POWERTRAIN GEOMETRY</span>
             </div>
-            <div className="font-display text-2xl tracking-wider text-vanguard-silver">
+            <div className="font-display text-2xl tracking-wider text-vanguard-silver font-bold">
               VANGUARD AEROVANE
             </div>
             <div className="w-full h-1 bg-vanguard-panel rounded-full overflow-hidden">
@@ -480,4 +544,3 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
     </div>
   );
 };
-

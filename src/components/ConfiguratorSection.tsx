@@ -28,7 +28,7 @@ export const ConfiguratorSection: React.FC<ConfiguratorSectionProps> = ({
       className="relative min-h-screen w-full flex flex-col justify-between py-32 px-4 sm:px-8 lg:px-12 select-none"
     >
       {/* Top Section Header */}
-      <div className="max-w-[1720px] mx-auto w-full text-center space-y-4">
+      <div className="max-w-[1440px] mx-auto w-full text-center space-y-4">
         <div className="inline-flex items-center space-x-2 text-[10px] font-mono tracking-telemetry text-vanguard-red uppercase bg-vanguard-panel/70 border border-vanguard-border px-3.5 py-1.5 rounded">
           <Palette className="w-3.5 h-3.5" />
           <span>VANGUARD ATELIER // BESPOKE CHASSIS SPECIFICATION</span>

@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="bg-vanguard-dark border-t border-vanguard-border pt-20 pb-12 px-4 sm:px-8 lg:px-12 text-vanguard-silver font-mono relative z-10">
-      <div className="max-w-[1720px] mx-auto space-y-16">
+      <div className="max-w-[1440px] mx-auto space-y-16">
         {/* Top Lap Records & Telemetry Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b border-vanguard-border">
           <div className="space-y-2">

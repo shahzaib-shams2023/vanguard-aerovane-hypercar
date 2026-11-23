@@ -7,7 +7,7 @@ export const CockpitSection: React.FC = () => {
       id="cockpit-section"
       className="relative min-h-screen w-full flex items-center justify-end py-32 px-4 sm:px-8 lg:px-12 pointer-events-none select-none"
     >
-      <div className="max-w-[1720px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left space for 3D Car Cockpit view */}
         <div className="lg:col-span-7 h-64 lg:h-auto" />
 
