@@ -336,18 +336,18 @@ export const PersistentCarCanvas: React.FC<PersistentCarCanvasProps> = ({
       if (p <= 0.16) {
         // Section 1: Hero Front 3/4 Dynamic Stance
         const t = p / 0.16;
-        targetCarPos.set(0.75, groundLevel, 0.1);
-        targetCarRot.set(0, 2.3 + t * 0.15, 0);
-        targetCamPos.set(3.4, 1.15, 4.2);
-        targetCamTarget.set(0.35, 0.18, 0);
+        targetCarPos.set(1.25, groundLevel, 0.15);
+        targetCarRot.set(0, 2.28 + t * 0.15, 0);
+        targetCamPos.set(3.6, 1.2, 4.4);
+        targetCamTarget.set(0.65, 0.2, 0);
         speedlineMat.opacity = 0;
       } else if (p <= 0.36) {
         // Section 2: Aerodynamics & Front Flanks
         const t = (p - 0.16) / 0.2;
         targetCarPos.set(
-          THREE.MathUtils.lerp(0.75, -1.0, t),
+          THREE.MathUtils.lerp(1.25, -1.0, t),
           groundLevel,
-          THREE.MathUtils.lerp(0.1, 0.5, t)
+          THREE.MathUtils.lerp(0.15, 0.5, t)
         );
         targetCarRot.set(0, THREE.MathUtils.lerp(2.45, 3.65, t), 0);
         targetCamPos.set(
