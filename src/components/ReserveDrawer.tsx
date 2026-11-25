@@ -1,33 +1,51 @@
-import React, { useState } from 'react';
-import { X, Check, Shield, Send, Sparkles } from 'lucide-react';
-import { hypercarAudio } from '../utils/sound';
-import { CarPaintOption } from './PersistentCarCanvas';
+import React, { useEffect, useRef, useState } from 'react';
+import { Check, Send, Shield, X } from 'lucide-react';
+import { CaliperFinish, LiveryFinish } from '../data/gt3Spec';
+import { gt3Audio } from '../utils/sound';
 
 interface ReserveDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedPaint: CarPaintOption;
-  aeroMode: string;
-  caliperColor: string;
+  selectedLivery: LiveryFinish;
+  aeroPackage: 'downforce' | 'vmax';
+  selectedCaliper: CaliperFinish;
 }
 
 export const ReserveDrawer: React.FC<ReserveDrawerProps> = ({
   isOpen,
   onClose,
-  selectedPaint,
-  aeroMode,
-  caliperColor,
+  selectedLivery,
+  aeroPackage,
+  selectedCaliper,
 }) => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [region, setRegion] = useState<string>('monaco');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevFocus = document.activeElement as HTMLElement | null;
+    panelRef.current?.focus();
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      prevFocus?.focus();
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    hypercarAudio.playIgnition();
+    gt3Audio.playIgnition();
     setIsSubmitted(true);
   };
 
@@ -39,140 +57,168 @@ export const ReserveDrawer: React.FC<ReserveDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-md transition-opacity">
-      <div className="w-full max-w-xl bg-vanguard-surface h-full shadow-2xl border-l border-vanguard-border flex flex-col justify-between overflow-y-auto p-6 sm:p-10">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-vanguard-border pb-6">
-          <div className="space-y-1">
-            <div className="inline-flex items-center space-x-2 text-[10px] font-mono tracking-telemetry text-vanguard-red uppercase">
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-black/75 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reserve-drawer-title"
+    >
+      <div
+        className="flex-1"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="w-full max-w-lg bg-gunmetal border-l border-hairline h-full overflow-y-auto p-6 sm:p-10 flex flex-col justify-between focus:outline-none"
+      >
+        <div className="flex items-start justify-between border-b border-hairline pb-6 gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-telemetry uppercase text-rosso">
               <Shield className="w-3.5 h-3.5" />
-              <span>PRIVATE CHASSIS ALLOCATION REQUEST</span>
+              <span>COMPETIZIONE CLIENTI</span>
             </div>
-            <h3 className="font-display text-2xl sm:text-3xl text-white uppercase">
-              Atelier Vanguard
+            <h3
+              id="reserve-drawer-title"
+              className="font-display text-2xl sm:text-3xl font-bold uppercase text-chalk"
+            >
+              Chassis Allocation
             </h3>
           </div>
+
           <button
+            type="button"
             onClick={() => {
-              hypercarAudio.playClick();
+              gt3Audio.playClick();
               onClose();
             }}
-            data-cursor="CLOSE"
-            className="p-3 rounded bg-vanguard-panel hover:bg-vanguard-red text-vanguard-muted hover:text-white transition-colors"
+            aria-label="Close chassis allocation drawer"
+            className="w-10 h-10 border border-hairline bg-tarmac hover:border-rosso text-ash hover:text-chalk flex items-center justify-center transition-colors shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content */}
         {isSubmitted ? (
-          <div className="py-16 text-center space-y-6 my-auto">
-            <div className="w-16 h-16 rounded-full bg-vanguard-red/20 border border-vanguard-red flex items-center justify-center mx-auto text-vanguard-red">
-              <Check className="w-8 h-8" />
+          <div className="py-12 my-auto space-y-6">
+            <div className="w-12 h-12 border border-rosso bg-rosso/15 flex items-center justify-center text-rosso">
+              <Check className="w-6 h-6" />
             </div>
             <div className="space-y-2">
-              <span className="font-mono text-xs tracking-telemetry text-vanguard-red block">
-                ALLOCATION ENCRYPTED // REF: VGD-V12-008
+              <span className="font-mono text-[10px] tracking-telemetry uppercase text-rosso block">
+                DOSSIER REGISTERED // 488-GT3-2018
               </span>
-              <h4 className="font-display text-2xl text-white uppercase">
-                Dossier Received
+              <h4 className="font-display text-2xl font-bold uppercase text-chalk">
+                Specification Logged
               </h4>
-              <p className="font-sans text-xs sm:text-sm text-vanguard-muted max-w-md mx-auto leading-relaxed">
-                Thank you, {name || 'esteemed collector'}. The Vanguard Private Client team will contact your representative within 24 hours to arrange wind-tunnel telemetry and factory track testing.
+              <p className="font-sans text-sm text-ash leading-relaxed">
+                Thank you, {name || 'Collector'}. Our Maranello client liaison will coordinate private track-day logistics and homologation documentation for your configured 488 GT3.
               </p>
             </div>
             <button
+              type="button"
               onClick={handleReset}
-              className="px-8 py-3 rounded bg-vanguard-panel border border-vanguard-border text-white font-mono text-xs tracking-telemetry uppercase hover:border-vanguard-red transition-colors"
+              className="px-6 py-3 border border-hairline bg-tarmac hover:border-rosso text-chalk font-mono text-xs tracking-editorial uppercase transition-colors"
             >
-              RETURN TO ATELIER
+              Return to Atelier
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="py-8 space-y-6 flex-1">
-            {/* Selected Spec Summary */}
-            <div className="p-4 rounded-xl bg-vanguard-panel border border-vanguard-border space-y-2 font-mono text-xs">
-              <span className="text-[10px] tracking-telemetry text-vanguard-muted uppercase block">
-                CURRENT SPECIFICATION MANIFEST
+          <form onSubmit={handleSubmit} className="py-6 space-y-5 flex-1">
+            {/* Specification Manifest */}
+            <div className="border border-hairline bg-tarmac p-4 space-y-2.5 font-mono text-xs">
+              <span className="text-[10px] tracking-editorial uppercase text-ash block border-b border-hairline pb-2">
+                CONFIGURED 488 GT3 MANIFEST
               </span>
-              <div className="flex justify-between text-vanguard-silver">
-                <span>LIVERY LACQUER:</span>
-                <span className="text-vanguard-red font-bold">{selectedPaint.name}</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-ash">LACQUER</span>
+                <span className="text-rosso font-medium text-right">{selectedLivery.name}</span>
               </div>
-              <div className="flex justify-between text-vanguard-silver">
-                <span>AERO CALIBRATION:</span>
-                <span className="text-white font-bold">{aeroMode.toUpperCase()} MODE</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-ash">AERO SETUP</span>
+                <span className="text-chalk text-right">
+                  {aeroPackage === 'downforce' ? 'ENDURANCE 980 KG' : 'LOW-DRAG SPRINT'}
+                </span>
               </div>
-              <div className="flex justify-between text-vanguard-silver">
-                <span>BRAKE CALIPERS:</span>
-                <span className="text-white font-bold">{caliperColor}</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-ash">CALIPERS</span>
+                <span className="text-chalk text-right">{selectedCaliper.name}</span>
               </div>
             </div>
 
-            {/* Inputs */}
             <div className="space-y-2">
-              <label className="font-mono text-[10px] tracking-telemetry text-vanguard-muted uppercase block">
-                COLLECTOR / PATRON NAME *
+              <label
+                htmlFor="patron-name"
+                className="font-mono text-[10px] tracking-editorial uppercase text-ash block"
+              >
+                Patron / Racing Team *
               </label>
               <input
+                id="patron-name"
                 type="text"
                 required
-                placeholder="e.g. Michael Andretti / Scuderia Client"
+                placeholder="Scuderia Private Client"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded bg-vanguard-panel border border-vanguard-border text-white font-mono text-xs focus:outline-none focus:border-vanguard-red"
+                className="w-full px-4 py-3 bg-tarmac border border-hairline text-chalk font-mono text-xs focus:outline-none focus:border-rosso"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="font-mono text-[10px] tracking-telemetry text-vanguard-muted uppercase block">
-                CONFIDENTIAL EMAIL ADDRESS *
+              <label
+                htmlFor="patron-email"
+                className="font-mono text-[10px] tracking-editorial uppercase text-ash block"
+              >
+                Confidential Email *
               </label>
               <input
+                id="patron-email"
                 type="email"
                 required
-                placeholder="client@privateoffice.mc"
+                placeholder="office@team-client.eu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded bg-vanguard-panel border border-vanguard-border text-white font-mono text-xs focus:outline-none focus:border-vanguard-red"
+                className="w-full px-4 py-3 bg-tarmac border border-hairline text-chalk font-mono text-xs focus:outline-none focus:border-rosso"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="font-mono text-[10px] tracking-telemetry text-vanguard-muted uppercase block">
-                PRIMARY HOMOLOGATION REGION
+              <label
+                htmlFor="patron-region"
+                className="font-mono text-[10px] tracking-editorial uppercase text-ash block"
+              >
+                Series / Track Jurisdiction
               </label>
               <select
+                id="patron-region"
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="w-full px-4 py-3 rounded bg-vanguard-panel border border-vanguard-border text-white font-mono text-xs focus:outline-none focus:border-vanguard-red"
+                className="w-full px-4 py-3 bg-tarmac border border-hairline text-chalk font-mono text-xs focus:outline-none focus:border-rosso"
               >
-                <option value="monaco">Monaco / Western Europe (EU Spec)</option>
-                <option value="uk">United Kingdom (Silverstone Track Spec)</option>
-                <option value="usa">United States (DOT & Track Exemption)</option>
-                <option value="uae">United Arab Emirates / Gulf Coast Spec</option>
-                <option value="japan">Japan / Fuji Speedway Spec</option>
+                <option value="monaco">Europe — GT World Challenge / Spa Spec</option>
+                <option value="uk">United Kingdom — British GT / Silverstone</option>
+                <option value="usa">North America — IMSA GTD / Daytona</option>
+                <option value="uae">Middle East — Yas Marina Endurance</option>
+                <option value="japan">Asia-Pacific — Suzuka / Bathurst 12H</option>
               </select>
             </div>
 
             <button
               type="submit"
-              data-cursor="TRANSMIT"
-              className="w-full py-4 rounded bg-vanguard-red hover:bg-vanguard-redGlow text-white font-mono text-xs tracking-telemetry uppercase transition-all shadow-glow-red flex items-center justify-center space-x-2 mt-4"
+              className="w-full py-4 bg-rosso hover:bg-rossoBright text-chalk font-mono text-xs tracking-[0.18em] uppercase transition-colors flex items-center justify-center gap-2.5"
             >
-              <span>TRANSMIT CHASSIS RESERVATION</span>
+              <span>Transmit Allocation Inquiry</span>
               <Send className="w-3.5 h-3.5" />
             </button>
           </form>
         )}
 
-        {/* Footer */}
-        <div className="border-t border-vanguard-border pt-4 text-[10px] font-mono text-vanguard-muted flex justify-between items-center">
-          <span>VANGUARD SPECIAL VEHICLES DIVISION</span>
-          <span>STRICT CLIENT SECRECY</span>
+        <div className="border-t border-hairline pt-4 font-mono text-[10px] tracking-editorial uppercase text-ash flex justify-between">
+          <span>VANGUARD COMPETIZIONE</span>
+          <span>FIA GT3 ARCHIVE</span>
         </div>
       </div>
     </div>
   );
 };
-

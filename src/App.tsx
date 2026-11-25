@@ -1,111 +1,212 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Lenis from 'lenis';
-import { CustomCursor } from './components/CustomCursor';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+  AERO_ZONES,
+  CALIPER_FINISHES,
+  CaliperFinish,
+  LIVERY_FINISHES,
+  LiveryFinish,
+} from './data/gt3Spec';
+import { Ferrari488Stage } from './components/Ferrari488Stage';
 import { Navbar } from './components/Navbar';
-import { CinematicHud } from './components/CinematicHud';
-import { PersistentCarCanvas, PAINT_OPTIONS, CarPaintOption } from './components/PersistentCarCanvas';
-import { CinematicFilmStage } from './components/CinematicFilmStage';
-import { Footer } from './components/Footer';
+import { HeroStage } from './components/HeroStage';
+import { MonographSection } from './components/MonographSection';
+import { AeroInspectionSection } from './components/AeroInspectionSection';
+import { ChassisMacroSection } from './components/ChassisMacroSection';
+import { CockpitDeckSection } from './components/CockpitDeckSection';
+import { AtelierStudioSection } from './components/AtelierStudioSection';
 import { ReserveDrawer } from './components/ReserveDrawer';
+import { Footer } from './components/Footer';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function App() {
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
-  const [activePaint, setActivePaint] = useState<CarPaintOption>(PAINT_OPTIONS[0]);
-  const [aeroMode, setAeroMode] = useState<'downforce' | 'vmax'>('downforce');
-  const [caliperColor, setCaliperColor] = useState<string>('ROSSO CORSA');
+  const lenisRef = useRef<Lenis | null>(null);
+
+  const [activeSectionId, setActiveSectionId] = useState<string>('hero');
+  const [activeAeroId, setActiveAeroId] = useState<string>(AERO_ZONES[0].id);
+  const [aeroCameraId, setAeroCameraId] = useState<string>(AERO_ZONES[0].cameraId);
+  const [atelierPresetId, setAtelierPresetId] = useState<string>('atelier');
+  const [interactiveOrbit, setInteractiveOrbit] = useState<boolean>(false);
+
+  const [activeLivery, setActiveLivery] = useState<LiveryFinish>(LIVERY_FINISHES[0]);
+  const [activeCaliper, setActiveCaliper] = useState<CaliperFinish>(CALIPER_FINISHES[0]);
+  const [aeroPackage, setAeroPackage] = useState<'downforce' | 'vmax'>('downforce');
+  const [lampsOn, setLampsOn] = useState<boolean>(false);
+  const [wheelSpeed, setWheelSpeed] = useState<number>(0);
   const [isReserveOpen, setIsReserveOpen] = useState<boolean>(false);
+  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
 
+  // Sync Lenis + GSAP ScrollTrigger + prefers-reduced-motion
   useEffect(() => {
-    // Lenis Smooth Inertia Scrolling
-    const lenis = new Lenis({
-      duration: 1.3,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 0.95,
-    });
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mediaQuery.matches);
+    const onMotionChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', onMotionChange);
 
-    const handleScroll = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (maxScroll > 0) {
-        const p = Math.min(1, Math.max(0, window.scrollY / maxScroll));
-        setScrollProgress(p);
-      }
+    let lenis: Lenis | null = null;
+    const onTick = (time: number) => {
+      lenis?.raf(time * 1000);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+    if (!mediaQuery.matches) {
+      lenis = new Lenis({
+        lerp: 0.095,
+        smoothWheel: true,
+      });
+      lenisRef.current = lenis;
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(onTick);
+      gsap.ticker.lagSmoothing(0);
     }
-    const animId = requestAnimationFrame(raf);
+
+    const ctx = gsap.context(() => {
+      const sections = gsap.utils.toArray<HTMLElement>('[data-section]');
+      sections.forEach((sec) => {
+        const id = sec.dataset.section || 'hero';
+        ScrollTrigger.create({
+          trigger: sec,
+          start: 'top 52%',
+          end: 'bottom 48%',
+          onEnter: () => setActiveSectionId(id),
+          onEnterBack: () => setActiveSectionId(id),
+        });
+      });
+    });
 
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('scroll', handleScroll);
-      lenis.destroy();
+      ctx.revert();
+      mediaQuery.removeEventListener('change', onMotionChange);
+      if (lenis) {
+        gsap.ticker.remove(onTick);
+        lenis.destroy();
+        lenisRef.current = null;
+      }
     };
   }, []);
 
-  const scrollToProgress = (p: number) => {
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: maxScroll * p, behavior: 'smooth' });
-  };
+  // Automatically release interactive 360 orbit when user scrolls away from Atelier
+  useEffect(() => {
+    if (activeSectionId !== 'atelier' && interactiveOrbit) {
+      setInteractiveOrbit(false);
+    }
+  }, [activeSectionId, interactiveOrbit]);
+
+  // Compute the authoritative 3D camera shot for the active section
+  const resolvedShotId = (() => {
+    switch (activeSectionId) {
+      case 'hero':
+        return 'hero';
+      case 'monograph':
+        return 'monograph';
+      case 'aero':
+        return aeroCameraId;
+      case 'chassis':
+        return 'chassis-wheel';
+      case 'cockpit':
+        return 'cockpit';
+      case 'atelier':
+        return atelierPresetId;
+      default:
+        return 'hero';
+    }
+  })();
+
+  const scrollToSection = useCallback(
+    (sectionId: string) => {
+      const el = document.getElementById(sectionId);
+      if (!el) return;
+      if (lenisRef.current && !reducedMotion) {
+        lenisRef.current.scrollTo(el, { offset: 0 });
+      } else {
+        el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+      }
+    },
+    [reducedMotion]
+  );
 
   return (
-    <div className="min-h-screen bg-vanguard-dark text-vanguard-silver font-sans relative selection:bg-vanguard-red selection:text-white">
-      {/* Precision Trailing HUD Cursor */}
-      <CustomCursor />
-
-      {/* Persistent Cinematic Director Viewport & Timecode HUD */}
-      <CinematicHud scrollProgress={scrollProgress} />
-
-      {/* Central Persistent 3D Sports Car Canvas */}
-      <PersistentCarCanvas
-        scrollProgress={scrollProgress}
-        activePaint={activePaint}
-        aeroMode={aeroMode}
+    <div className="min-h-screen bg-tarmac text-chalk relative">
+      {/* Persistent Real-Time 2018 Ferrari 488 GT3 WebGL Stage */}
+      <Ferrari488Stage
+        activeShotId={resolvedShotId}
+        activeLivery={activeLivery}
+        activeCaliper={activeCaliper}
+        lampsOn={lampsOn}
+        wheelSpinSpeed={activeSectionId === 'chassis' ? wheelSpeed : 0}
+        interactiveOrbit={activeSectionId === 'atelier' && interactiveOrbit}
+        reducedMotion={reducedMotion}
       />
 
-      {/* Telemetry Navigation Header */}
+      {/* Top Architectural Navigation */}
       <Navbar
-        scrollProgress={scrollProgress}
+        activeSectionId={activeSectionId}
+        onNavigate={scrollToSection}
         onOpenReserve={() => setIsReserveOpen(true)}
-        onNavigateTo={scrollToProgress}
       />
 
-      {/* Synchronized Cinematic Film Stage (Chapters 01 to 06) */}
-      <CinematicFilmStage
-        scrollProgress={scrollProgress}
-        activePaint={activePaint}
-        onSelectPaint={setActivePaint}
-        aeroMode={aeroMode}
-        onToggleAeroMode={setAeroMode}
-        caliperColor={caliperColor}
-        onSelectCaliper={setCaliperColor}
-        onOpenReserve={() => setIsReserveOpen(true)}
-        onNavigateTo={scrollToProgress}
-      />
+      {/* Semantic Document Chapters */}
+      <main>
+        <HeroStage
+          onExplore={() => scrollToSection('monograph')}
+          onOpenReserve={() => setIsReserveOpen(true)}
+        />
 
-      {/* Extended scroll track providing Lenis smooth inertia across all 6 cinematic acts */}
-      <div className="h-[650vh] pointer-events-none" />
+        <MonographSection />
 
-      {/* Track Telemetry Colophon */}
-      <Footer />
+        <AeroInspectionSection
+          activeAeroId={activeAeroId}
+          onSelectAero={(zoneId, cameraId) => {
+            setActiveAeroId(zoneId);
+            setAeroCameraId(cameraId);
+          }}
+        />
 
-      {/* Chassis Allocation Drawer */}
+        <ChassisMacroSection
+          activeCaliper={activeCaliper}
+          onSelectCaliper={setActiveCaliper}
+          wheelSpeed={wheelSpeed}
+          onChangeWheelSpeed={setWheelSpeed}
+        />
+
+        <CockpitDeckSection
+          lampsOn={lampsOn}
+          onToggleLamps={() => setLampsOn((prev) => !prev)}
+        />
+
+        <AtelierStudioSection
+          activeLivery={activeLivery}
+          onSelectLivery={setActiveLivery}
+          activeCaliper={activeCaliper}
+          onSelectCaliper={setActiveCaliper}
+          aeroPackage={aeroPackage}
+          onChangeAeroPackage={setAeroPackage}
+          lampsOn={lampsOn}
+          onToggleLamps={() => setLampsOn((prev) => !prev)}
+          interactiveOrbit={interactiveOrbit}
+          onToggleOrbit={() => setInteractiveOrbit((prev) => !prev)}
+          activePresetId={atelierPresetId}
+          onSelectPreset={(shotId) => {
+            setInteractiveOrbit(false);
+            setAtelierPresetId(shotId);
+          }}
+          onOpenReserve={() => setIsReserveOpen(true)}
+        />
+      </main>
+
+      <Footer onBackToTop={() => scrollToSection('hero')} />
+
       <ReserveDrawer
         isOpen={isReserveOpen}
         onClose={() => setIsReserveOpen(false)}
-        selectedPaint={activePaint}
-        aeroMode={aeroMode}
-        caliperColor={caliperColor}
+        selectedLivery={activeLivery}
+        aeroPackage={aeroPackage}
+        selectedCaliper={activeCaliper}
       />
     </div>
   );
 }
 
 export default App;
-
