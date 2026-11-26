@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Menu, Volume2, VolumeX, X } from 'lucide-react';
 import { gt3Audio } from '../utils/sound';
 
@@ -28,12 +28,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onOpenReserve,
 }) => {
-  const [soundOn, setSoundOn] = useState<boolean>(false);
+  const [soundOn, setSoundOn] = useState<boolean>(() => gt3Audio.isSoundActive());
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
+  useEffect(() => {
+    return gt3Audio.subscribe(setSoundOn);
+  }, []);
+
   const handleToggleAudio = () => {
-    const next = gt3Audio.toggle();
-    setSoundOn(next);
+    gt3Audio.toggle();
   };
 
   const handleNavClick = (id: string) => {

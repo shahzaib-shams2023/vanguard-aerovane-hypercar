@@ -453,6 +453,7 @@ export const Ferrari488Stage: React.FC<Ferrari488StageProps> = ({
     let currentOffsetX = 0;
     let currentOffsetY = 0;
     let wasOrbitActive = false;
+    let prevWheelSpin = 0;
 
     const clock = new THREE.Clock();
     let animId = 0;
@@ -515,6 +516,10 @@ export const Ferrari488Stage: React.FC<Ferrari488StageProps> = ({
 
       // Wheel rotation (true-axis spin in chassis section)
       const spin = wheelSpinRef.current;
+      if (spin < prevWheelSpin - 0.3) {
+        gt3Audio.playTurboFlutter();
+      }
+      prevWheelSpin = spin;
       if (spin > 0 && wheelPivots.length > 0 && !reducedMotionRef.current) {
         const angularStep = spin * delta * 6.5;
         wheelPivots.forEach(({ pivot }) => {
